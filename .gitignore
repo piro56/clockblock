@@ -17,3 +17,5 @@ Cargo.lock
 db-data/
 ./db-data
 ./db-data/**
+
+.env
