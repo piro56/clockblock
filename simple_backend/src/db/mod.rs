@@ -6,11 +6,6 @@ pub async fn init_tables(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
     CREATE TABLE IF NOT EXISTS test_table (
         id bigserial,
         info text
-    );").;
-    // sqlx::query(r#"
-    // CREATE TABLE IF NOT EXISTS test_table (
-    //     id bigserial,
-    //     info text
-    // );"#,).execute(pool).await?;
+    );").execute(pool).await?;
     return Ok(());
 }
