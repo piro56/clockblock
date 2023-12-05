@@ -5,12 +5,13 @@ services:
     restart: always
     environment:
       - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_DB=simpledb
     networks:
       - server-side
     ports:
       - 5432:5432
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - ./db-data:/var/lib/postgresql/data
 
 networks:
   client-side: {}

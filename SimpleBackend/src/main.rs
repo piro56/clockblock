@@ -1,7 +1,8 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use dotenv::dotenv;
 use sqlx::postgres::{PgPoolOptions, PgRow};
-use sqlx::{FromRow, Row, Pool, Postgres};
+use sqlx::{Pool, Postgres};
+mod db;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -16,7 +17,7 @@ async fn main() -> std::io::Result<()> {
     .connect(&postgres_url)
     .await.expect("DB Failed to connect");
 
-    init_tables(&pool).await.expect("Failed to initialize tables");
+    db::init_tables(&pool).await.expect("Failed to initialize tables");
 
 
     HttpServer::new(
@@ -36,12 +37,3 @@ async fn main_page() -> impl Responder {
     HttpResponse::Ok().body("Hello")
 }
 
-async fn init_tables(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
-    sqlx::query(r#"
-    CREATE TABLE IF NOT EXISTS test_table (
-        id bigserial,
-        info text
-    );"#,).execute(pool).await?;
-
-    return Ok(());
-}
