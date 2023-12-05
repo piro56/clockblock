@@ -1,20 +1,5 @@
 use maud::{html, PreEscaped};
 
-
-pub fn get_page() -> PreEscaped<String> {
-    let result = html!(
-        html {
-            head{
-                link rel="stylesheet" href="/static/style.css"{};
-            }
-            body {
-                h1 { "Hello World!" }
-            }
-        }
-    );
-    return result;
-}
-
 pub fn initial_page(tables: &Vec<String>) -> PreEscaped<String> {
 
     let result = html!(

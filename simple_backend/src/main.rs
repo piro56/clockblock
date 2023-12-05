@@ -1,7 +1,6 @@
-use actix_web::{get, web, web::Data, App, HttpServer, Result as AwResult};
+use actix_web::{web::Data, App, HttpServer};
 use dotenv::dotenv;
-use maud::Markup;
-use sqlx::postgres::{PgPoolOptions};
+use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
 
 
@@ -27,7 +26,6 @@ async fn main() -> std::io::Result<()> {
     .await.expect("DB Failed to connect");
 
     database::init_db(&pool).await.expect("Failed to initialize tables");
-
 
     HttpServer::new(
         move ||

@@ -1,8 +1,8 @@
 
 
-use sqlx::{Column, ValueRef};
-use sqlx::{Pool, Postgres, postgres::PgQueryResult, Row};
-use sqlx::postgres::{PgRow, PgColumn};
+use sqlx::ValueRef;
+use sqlx::{Pool, Postgres, Row};
+use sqlx::postgres::PgRow;
 
 
 pub async fn get_tables(pool: &Pool<Postgres>) -> Result<Vec<String>, sqlx::Error> {
