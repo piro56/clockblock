@@ -1,4 +1,4 @@
-use sqlx::{FromRow, Row, Pool, Postgres};
+use sqlx::{Pool, Postgres};
 
 pub async fn init_tables(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
     sqlx::query!("

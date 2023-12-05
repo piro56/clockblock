@@ -98,3 +98,22 @@ aside,
 		font-size: 18px;
 	}
 }
+
+th {
+	color: #ccc;
+}
+
+th, td {
+	border:1px solid white;
+	padding: 5px 10px;
+}
+
+
+.flexcenter {
+	height: 30%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	justify-items: center;
+	flex-direction: column;
+}

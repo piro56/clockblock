@@ -1,12 +1,13 @@
-use actix_web::{get, post, web, web::Data, App, HttpResponse, HttpServer, Responder, Result as AwResult};
+use actix_web::{get, web, web::Data, App, HttpServer, Result as AwResult};
 use dotenv::dotenv;
 use maud::Markup;
-use sqlx::postgres::{PgPoolOptions, PgRow};
+use sqlx::postgres::{PgPoolOptions};
 use sqlx::{Pool, Postgres};
 
 
-mod db;
+mod database;
 mod pages;
+mod routes;
 
 pub struct AppState {
     db: Pool<Postgres>,
@@ -25,7 +26,7 @@ async fn main() -> std::io::Result<()> {
     .connect(&postgres_url)
     .await.expect("DB Failed to connect");
 
-    db::init_db(&pool).await.expect("Failed to initialize tables");
+    database::init_db(&pool).await.expect("Failed to initialize tables");
 
 
     HttpServer::new(
@@ -33,9 +34,10 @@ async fn main() -> std::io::Result<()> {
         {
             let mut app = App::new()
                 .app_data(Data::new(AppState { db: pool.clone() }));
-            app = app.service(main_page)
+            app = app.service(routes::index_page)
                     .service(actix_files::Files::new("/static", "./static").show_files_listing())
-                    .service(db_page);
+                    .service(routes::db::db_page)
+                    .service(routes::db::table_page);
             return app;
         }
     ).bind(("127.0.0.1", 8080))?
@@ -43,25 +45,4 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
-#[get("/")]
-async fn main_page() -> AwResult<Markup> {
-    Ok(pages::simple_page::getPage())
-}
 
-#[get("/db")]
-async fn db_page(state: Data<AppState>) -> AwResult<Markup> {
-    
-    let tables = db::describe_db::get_tables(&state.db).await;
-    let tables = match tables {
-        Ok(x) => x,
-        Err(_) => Vec::new()
-    };
-
-    Ok(pages::db_page::initial_page(&tables))
-}
-
-#[get("/db/{table_name}")]
-async fn table_page(state: Data<AppState>, path: web::Path<(String)>) -> AwResult<Markup> {
-    let table_name = path.into_inner();
-    Ok(pages::simple_page::getPage())
-}

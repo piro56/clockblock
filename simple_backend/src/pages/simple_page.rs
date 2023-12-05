@@ -1,13 +1,16 @@
 use maud::{html, PreEscaped};
 
-pub fn getPage() -> PreEscaped<String> {
+pub fn get_page() -> PreEscaped<String> {
     let result = html!(
         html {
             head{
                 link rel="stylesheet" href="/static/style.css"{};
             }
             body {
-                h1 { "Hello World!" }
+                .flexcenter {
+                    h1 { "Hello World!" }
+                    a href="/db" { "Database Info" }
+                }
             }
         }
     );
