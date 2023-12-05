@@ -15,19 +15,27 @@ export default function Home() {
           ClockBlock
         </h1>
         <p className='text-md pb-8'>An easy way to block access to your files and keys.</p>
-        <div className='flex flex-row min-w-[40%] lg:max-w-[45%] pt-8 
+        <div className='flex flex-row min-w-[40%] lg:max-w-[45%] pt-4 
           text-center justify-items-center justify-content-center rounded-xl flex-wrap'>
- 
-           <form className='basis-full p-2'>
+           <form className='basis-full p-2 pb-1'>
           <input className='text-center bg-gray-800 rounded-md w-[100%] min-h-[40px]' placeholder='Key'></input>
           </form>
-          <form className='grow p-2 min-h-[40px]'>
-            <DatePicker dateFormat="MM/dd/yyyy HH:mm" selected={startDate} onChange={ (date) => {if (date) setStartDate(date)}} showTimeSelect/>
+          <form className='basis-full p-2 pb-1'>
+          <input className='text-center bg-gray-800 rounded-md w-[100%] min-h-[40px]' placeholder='Nonce (Optional)'></input>
           </form>
-          <form className='basis-full p-2 pt-4'>
+          <div className="flex flex-row grow align-center justify-items-center p-2 gap-2">
+            <div className="flex flex-col justify-center grow text-center bg-gray-800 rounded"
+             title="You will not be able to retrieve your key (and nonce) until after this timestamp.">
+              <h1>Unlock Time:</h1>
+            </div>
+            <form className='grow min-h-[40px] '>
+              <DatePicker dateFormat="MM/dd/yyyy HH:mm" selected={startDate} onChange={ (date) => {if (date) setStartDate(date)}} showTimeSelect/>
+            </form>
+          </div>
+          
+          <form className='basis-full'>
           <button className='text-center bg-green-800 rounded-md w-[50%] min-h-[40px]'>Submit</button>
           </form>
-          <p>{}</p>
         </div>
       </div>
     </main>
