@@ -1,11 +1,7 @@
-use sqlx::{FromRow, Row, Pool, Postgres};
+use sqlx::{Pool, Postgres};
+mod init_db;
+pub mod describe_db;
 
-
-pub async fn init_tables(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
-    sqlx::query!("
-    CREATE TABLE IF NOT EXISTS test_table (
-        id bigserial,
-        info text
-    );").execute(pool).await?;
-    return Ok(());
+pub async fn init_db(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
+    init_db::init_tables(pool).await
 }
