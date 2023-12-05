@@ -15,3 +15,4 @@ Cargo.lock
 
 # DB Data
 ./db-data
+./db-data/**
