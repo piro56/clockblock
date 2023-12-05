@@ -50,10 +50,11 @@ async fn main_page() -> AwResult<Markup> {
 
 #[get("/db")]
 async fn db_page(state: Data<AppState>) -> AwResult<Markup> {
-    let mut tables = db::describe_db::get_tables(&state.db).await;
+    
+    let tables = db::describe_db::get_tables(&state.db).await;
     let tables = match tables {
-        Some(x) => x,
-        None => Vec::new()
+        Ok(x) => x,
+        Err(_) => Vec::new()
     };
 
     Ok(pages::db_page::initial_page(&tables))
