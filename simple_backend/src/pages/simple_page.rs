@@ -8,7 +8,7 @@ pub fn get_page() -> PreEscaped<String> {
             }
             body {
                 .flexcenter {
-                    h1 { "Hello World!" }
+                    h1 { "Hello!" }
                     a href="/db" { "Database Info" }
                 }
             }
