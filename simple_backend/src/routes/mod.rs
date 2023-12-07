@@ -1,4 +1,5 @@
 pub mod db;
+pub mod encrypt;
 
 use actix_web::{get, Result as AwResult};
 use maud::Markup;

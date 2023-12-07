@@ -7,6 +7,7 @@ use sqlx::{Pool, Postgres};
 mod database;
 mod pages;
 mod routes;
+mod models;
 
 pub struct AppState {
     db: Pool<Postgres>,
@@ -16,7 +17,6 @@ pub struct AppState {
 async fn main() -> std::io::Result<()> {
     println!("Welcome.");
     dotenv().ok();
-    
 
     let postgres_url = std::env::var("DATABASE_URL").expect("Must set up DB URL");
 
@@ -25,7 +25,6 @@ async fn main() -> std::io::Result<()> {
     .connect(&postgres_url)
     .await.expect("DB Failed to connect");
 
-    database::init_db(&pool).await.expect("Failed to initialize tables");
 
     HttpServer::new(
         move ||
@@ -35,7 +34,8 @@ async fn main() -> std::io::Result<()> {
             app = app.service(routes::index_page)
                     .service(actix_files::Files::new("/static", "./static").show_files_listing())
                     .service(routes::db::db_page)
-                    .service(routes::db::table_page);
+                    .service(routes::db::table_page)
+                    .service(routes::encrypt::requestlock);
             return app;
         }
     ).bind(("127.0.0.1", 8080))?
