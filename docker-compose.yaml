@@ -5,7 +5,7 @@ services:
     restart: always
     environment:
       - POSTGRES_PASSWORD=mysecretpassword
-      - POSTGRES_DB=simpledb
+      - POSTGRES_DB=rust_actix
     networks:
       - server-side
     ports:
