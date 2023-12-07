@@ -1,16 +1,23 @@
 "use client"
 import DatePicker from "react-datepicker";
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useState, MouseEvent, useEffect} from 'react';
 import "react-datepicker/dist/react-datepicker.css";
 import "./datepicker.css";
-
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Home() {
   const [startDate, setStartDate] = useState(new Date());
-  const [selectorToggle, setSelector] = useState(false);
+  const [selectorToggle, setSelector] = useState(true);
   const [selectTimestamp, setTimestamp] = useState(0);
   const [timeInput, setTimeInput] = useState("");
-  
+  const [lockOutput, setLockOutput] = useState("");
+  const ip = process.env.NEXT_PUBLIC_BACKEND_IP;
+  const port = process.env.NEXT_PUBLIC_BACKEND_PORT;
+  const backendconn = 'http://' + ip + ':' + port + "/";
+  const lockpath = backendconn + 'encrypt/lock';
+
+
   function onDatePick(date: Date | null) {
     if (!date) return;
     setStartDate(date);
@@ -21,17 +28,45 @@ export default function Home() {
     let time = parseInt(s);
     time = time * 1000;
     if (isNaN(time)) {
-      console.log("IsNan.");
       return;
     }
     let dateTime = new Date(time);
     setTimestamp(time);
     setStartDate(dateTime);
     setTimeInput(s);
-    console.log(dateTime);
   }
 
+  function onSubmit(e: MouseEvent) {
+    let now = new Date();
+    setLockOutput("hello");
+    if (startDate < now) {
+      toast("Bad Time!");
+      return;
+    }
+    try {
+      fetch(lockpath, {
+        method: "POST",
+        body: JSON.stringify({
+          "data": "Hello There Sir",
+          "lock_time": (startDate.getTime()/1000).toString()
+        }),
+        headers: {
+            "Content-type": "application/json; charset=UTF-8"
+        }
+      }).then(x => x.text())
+        .then(data => 
+          setLockOutput(data)
+        );
+      
+    } catch (e: any) {
+      toast.error(e.toString());
+    }
+
+  }
+
+
   return (
+    
     <main className="flex min-h-screen flex-col items-center justify-between justify-items-center pl-24 pr-24 pt-12">
       <div className="max-w-5xl w-full items-center content-center font-mono md:flex flex-col">
         <h1 className='align-center text-center justify-self-center text-3xl'>
@@ -49,7 +84,7 @@ export default function Home() {
           <div className="flex flex-row grow align-center justify-items-center p-2 gap-2">
             <div className="flex flex-col hidden md:flex justify-center grow text-center bg-gray-800 rounded"
              title="You will not be able to retrieve your key (and nonce) until after this timestamp.">
-              <button onClick={(e) => {setSelector(!selectorToggle);}}>{selectorToggle ? "Unlock Date:" : "Unlock Timestamp:"}</button>
+              <button type="button" onClick={(e) => {setSelector(!selectorToggle);}}>{selectorToggle ? "Unlock Date:" : "Unlock Timestamp:"}</button>
             </div>
             { selectorToggle && 
               <form className='grow min-h-[40px] '>
@@ -64,10 +99,19 @@ export default function Home() {
               </form>
             }
           </div>
-
-          <form className='basis-full'>
-          <button className='text-center bg-green-800 rounded-md w-[50%] min-h-[40px]'>Submit</button>
+          <form className='basis-full pl-4 pr-4'>
+            <button type="button" className='text-center bg-green-800 rounded-md w-[50%] min-h-[40px]' onClick={(e) => onSubmit(e) }>Submit</button>
           </form>
+
+          <form className='basis-full pt-4 pl-4 pr-4'>
+            <button type="button" className='text-center bg-blue-800 rounded-md w-[50%] min-h-[40px]'>Copy</button>
+          </form>
+          <div className="flex flex-col grow h-[300px] w-full p-2">
+            <div className="h-full w-full grow">
+              <textarea id='textarea' className="grow h-full w-full resize-none rounded-md" readOnly value={lockOutput}></textarea>
+            </div>
+          </div>
+
         </div>
       </div>
     </main>
