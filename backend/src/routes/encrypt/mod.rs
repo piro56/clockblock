@@ -91,8 +91,9 @@ pub async fn decrypt_store(pool: &Pool<Postgres>, id: i64) -> Result<String, Err
 
     let priv_key = Rsa::private_key_from_pem(&dbinfo.privatekey)?;
     let mut buf = vec![0; priv_key.size() as usize];
-    priv_key.private_decrypt(&dbinfo.encrypted_data, &mut buf, Padding::PKCS1)?;
-
+    let bufsz = priv_key.private_decrypt(&dbinfo.encrypted_data, &mut buf, Padding::PKCS1)?;
+    buf.truncate(bufsz);
+    
     let result = String::from_utf8(buf)?;
 
     return Ok(result);

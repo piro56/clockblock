@@ -72,9 +72,6 @@ export default function Locker() {
             <form className='basis-full p-2 pb-1'>
                 <input className='text-center bg-gray-800 rounded-md w-[100%] min-h-[40px]' placeholder='Key' value={keyInput} onChange={(e) => setKeyInput(e.target.value)}></input>
             </form>
-            <form className='basis-full p-2 pb-1'>
-                <input className='text-center bg-gray-800 rounded-md w-[100%] min-h-[40px]' placeholder='Nonce (Optional)'></input>
-            </form>
             <div className="flex flex-row grow align-center justify-items-center p-2 gap-2">
                 <div className="flex flex-col hidden md:flex justify-center grow text-center bg-gray-800 rounded"
                     title="You will not be able to retrieve your key (and nonce) until after this timestamp.">

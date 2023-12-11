@@ -23,7 +23,7 @@ async fn main() -> std::io::Result<()> {
     .max_connections(5)
     .connect(&postgres_url)
     .await.expect("DB Failed to connect");
-
+    database::init_db(&pool).await.expect("Database failed to construct");
 
     HttpServer::new(
         move ||
