@@ -7,7 +7,6 @@ use sqlx::{Pool, Postgres};
 mod database;
 mod pages;
 mod routes;
-mod models;
 
 pub struct AppState {
     db: Pool<Postgres>,
@@ -29,13 +28,15 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(
         move ||
         {
-            let mut app = App::new()
+            let app = App::new()
                 .app_data(Data::new(AppState { db: pool.clone() }));
-            app = app.service(routes::index_page)
+            let app = app.service(routes::index_page)
                     .service(actix_files::Files::new("/static", "./static").show_files_listing())
                     .service(routes::db::db_page)
                     .service(routes::db::table_page)
-                    .service(routes::encrypt::requestlock);
+                    .service(routes::encrypt::requestlock)
+                    .service(routes::encrypt::requestunlock)
+                    .wrap(actix_cors::Cors::permissive());
             return app;
         }
     ).bind(("127.0.0.1", 8080))?

@@ -1,31 +1,34 @@
 use std::time::{SystemTime, UNIX_EPOCH};
-use openssl::{rsa::{Rsa, Padding}, error::ErrorStack};
+use openssl::{rsa::{Rsa, Padding}};
 use sqlx::{Postgres, Pool};
 use anyhow::Error;
 use serde::Deserialize;
-use actix_web::{post, web, App, web::Data, HttpServer, Result, Error as awError, ResponseError as rError};
+use actix_web::{post, put, web, web::Data, Result};
 
 
 use crate::database;
+use crate::database::timelock::{UnlockInfo};
 use crate::AppState;
 
 
 // Encrypt data
 // Store keys
 // [id] [private key] [timestamp]
-pub async fn ssl_encrypt(pool: &Pool<Postgres>, store: &String, timestamp_secs: i64) -> Result<Vec<u8>, Error> {
+// Don't need public key
+pub async fn ssl_encrypt(pool: &Pool<Postgres>, store: &String, timestamp_secs: i64) -> Result<i64, Error> {
 
     let rsa = Rsa::generate(2048).unwrap();
     let data = store.as_bytes();
     let mut buf = vec![0; rsa.size() as usize];    
-    let encrypted_len = rsa.public_encrypt(data, &mut buf, Padding::PKCS1)?;
+    let _ = rsa.public_encrypt(data, &mut buf, Padding::PKCS1)?;
     
     let privkey = rsa.private_key_to_pem()?;
     let pubkey = rsa.public_key_to_pem_pkcs1()?;
 
-    database::timelock::add_key(pool, &privkey, timestamp_secs as i64).await?;
+    let dbresult = database::timelock::add_key(pool, &buf, &privkey, timestamp_secs as i64).await?;
+        
 
-    return Ok(pubkey)
+    return Ok(dbresult)
 }
 
 #[derive(Deserialize)]
@@ -34,7 +37,12 @@ struct LockRequest {
     lock_time: String
 }
 
-#[post("/encrypt/lock")]
+#[derive(Deserialize)]
+struct UnlockRequest {
+    id: i64
+}
+
+#[put("/encrypt/lock")]
 pub async fn requestlock(state: Data<AppState>, lock: web::Json<LockRequest>) -> Result<String> {
     let now = SystemTime::now();
     let since_the_epoch = now.duration_since(UNIX_EPOCH)
@@ -52,21 +60,41 @@ pub async fn requestlock(state: Data<AppState>, lock: web::Json<LockRequest>) ->
         return Err(actix_web::error::ErrorBadRequest("Time invalid"));
     }
 
-    let pub_key = ssl_encrypt(&state.db, &key, lock_time).await;
-    let pub_key = match pub_key {
+    let id = ssl_encrypt(&state.db, &key, lock_time).await;
+    let id = match id {
         Ok(k) => k,
         Err(e) => { return Err(actix_web::error::ErrorBadRequest(e.to_string())) }
     };
 
-    let stringkey = match std::str::from_utf8(&pub_key) {
-        Ok(k) => k,
-        Err(e) => { return Err(actix_web::error::ErrorBadRequest(e.to_string())) }
-    };
+    let stringkey = id.to_string();
+    println!("Created lock key ID: {id}");
 
     return Ok(String::from(stringkey));
 }
 
-pub fn decrypt_store(enc: &[u8], priv_key: &String) {
-    
+#[post("/decrypt/unlock")]
+pub async fn requestunlock(state: Data<AppState>, unlock: web::Json<UnlockRequest>) -> Result<String> {
+    println!("Unlocking ID: {}", unlock.id);
 
+    let result = decrypt_store(&state.db, unlock.id).await;
+    let result = match result {
+        Ok(r) => r,
+        Err(e) => { return Err(actix_web::error::ErrorBadRequest(e.to_string())) }
+    };
+
+    return Ok(result)
 }
+
+pub async fn decrypt_store(pool: &Pool<Postgres>, id: i64) -> Result<String, Error> {
+
+    let dbinfo = database::timelock::get_key(pool, id).await?;
+
+    let priv_key = Rsa::private_key_from_pem(&dbinfo.privatekey)?;
+    let mut buf = vec![0; priv_key.size() as usize];
+    priv_key.private_decrypt(&dbinfo.encrypted_data, &mut buf, Padding::PKCS1)?;
+
+    let result = String::from_utf8(buf)?;
+
+    return Ok(result);
+}
+

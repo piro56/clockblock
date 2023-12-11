@@ -12,10 +12,12 @@ opt-level = 1
 actix-web = "4"
 dotenv = "0.15.0"
 serde = "1.0.193"
-sqlx = { features = [ "runtime-tokio", "tls-rustls", "postgres", "macros" ] }
+sqlx = { features = [ "runtime-tokio", "tls-rustls", "postgres", "macros", "chrono" ] }
 maud = { version = "0.25.0", features= ["actix-web"] }
 actix-files = "0.6.2"
 rand = "0.8.5"
 openssl = "0.10.61"
 anyhow = "1.0.75"
+chrono = "0.4.31"
+actix-cors = "0.6.5"
 
