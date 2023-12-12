@@ -24,6 +24,7 @@ export default function Unlocker() {
                     "id": parseInt(receipt),
                 }),
                 headers: {
+                    'Access-Control-Allow-Origin':'*',
                     "Content-type": "application/json; charset=UTF-8"
                 }
             }).then(x => x.text())

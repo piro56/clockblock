@@ -50,6 +50,7 @@ export default function Locker() {
                     "lock_time": (startDate.getTime() / 1000).toString()
                 }),
                 headers: {
+                    'Access-Control-Allow-Origin':'*',
                     "Content-type": "application/json; charset=UTF-8"
                 }
             }).then(x => x.text())

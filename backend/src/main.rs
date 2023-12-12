@@ -18,7 +18,7 @@ async fn main() -> std::io::Result<()> {
     dotenv().ok();
 
     let postgres_url = std::env::var("DATABASE_URL").expect("Must set up DB URL");
-
+    let port: u16 = std::env::var("BACKEND_PORT").expect("Must specify BACKEND_PORT").parse().expect("Port Read Error");
     let pool = PgPoolOptions::new()
     .max_connections(5)
     .connect(&postgres_url)
@@ -35,11 +35,10 @@ async fn main() -> std::io::Result<()> {
                     .service(routes::db::db_page)
                     .service(routes::db::table_page)
                     .service(routes::encrypt::requestlock)
-                    .service(routes::encrypt::requestunlock)
-                    .wrap(actix_cors::Cors::permissive());
+                    .service(routes::encrypt::requestunlock);
             return app;
         }
-    ).bind(("127.0.0.1", 8080))?
+    ).bind(("0.0.0.0", port))?
     .run()
     .await
 }
