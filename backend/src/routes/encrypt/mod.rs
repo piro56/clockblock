@@ -1,4 +1,5 @@
 use std::time::{SystemTime, UNIX_EPOCH};
+use chrono::Utc;
 use openssl::{rsa::{Rsa, Padding}};
 use sqlx::{Postgres, Pool};
 use anyhow::Error;
@@ -88,6 +89,15 @@ pub async fn requestunlock(state: Data<AppState>, unlock: web::Json<UnlockReques
 pub async fn decrypt_store(pool: &Pool<Postgres>, id: i64) -> Result<String, Error> {
 
     let dbinfo = database::timelock::get_key(pool, id).await?;
+
+    let unlock_time = dbinfo.unlock_time.and_utc();
+    let dtnow = Utc::now();
+
+    if dtnow < unlock_time {
+        let result = format!("Please come back later. Unlock time is: {}", unlock_time.to_rfc2822());
+        return Ok(result);
+    }
+
 
     let priv_key = Rsa::private_key_from_pem(&dbinfo.privatekey)?;
     let mut buf = vec![0; priv_key.size() as usize];

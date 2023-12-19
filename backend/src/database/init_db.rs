@@ -15,7 +15,5 @@ pub async fn init_tables(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
         entered_time timestamp without time zone,
         encrypted_data bytea
     );").execute(pool).await?;
-
-
     return Ok(());
 }

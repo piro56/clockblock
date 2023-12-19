@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_web::{web::Data, App, HttpServer};
 use dotenv::dotenv;
 use sqlx::postgres::PgPoolOptions;
@@ -36,6 +37,7 @@ async fn main() -> std::io::Result<()> {
                     .service(routes::db::table_page)
                     .service(routes::encrypt::requestlock)
                     .service(routes::encrypt::requestunlock);
+                
             return app;
         }
     ).bind(("0.0.0.0", port))?
