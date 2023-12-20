@@ -1,5 +1,5 @@
 use std::time::{SystemTime, UNIX_EPOCH};
-use chrono::Utc;
+use chrono::{Utc, Datelike};
 use openssl::{rsa::{Rsa, Padding}};
 use sqlx::{Postgres, Pool};
 use anyhow::Error;
@@ -94,7 +94,12 @@ pub async fn decrypt_store(pool: &Pool<Postgres>, id: i64) -> Result<String, Err
     let dtnow = Utc::now();
 
     if dtnow < unlock_time {
-        let result = format!("Please come back later. Unlock time is: {}", unlock_time.to_rfc2822());
+        
+        let result = format!("Please come back later. Unlock time is: {}/{}/{} UTC mm/dd/yy",
+        unlock_time.month(),
+        unlock_time.day(),
+        unlock_time.year());
+
         return Ok(result);
     }
 
