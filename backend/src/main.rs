@@ -25,13 +25,13 @@ async fn main() -> std::io::Result<()> {
     .connect(&postgres_url)
     .await.expect("DB Failed to connect");
     database::init_db(&pool).await.expect("Database failed to construct");
-
     HttpServer::new(
         move ||
         {
             let app = App::new()
                 .app_data(Data::new(AppState { db: pool.clone() }));
             let app = app.service(routes::index_page)
+            .wrap(Cors::permissive())
                     .service(actix_files::Files::new("/static", "./static").show_files_listing())
                     .service(routes::db::db_page)
                     .service(routes::db::table_page)
